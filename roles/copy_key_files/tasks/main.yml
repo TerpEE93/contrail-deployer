@@ -1,0 +1,23 @@
+---
+# tasks file for copy_key_files
+
+- name: Removing /root/.ssh from target hosts
+  file:
+    path: "{{ rmt_ssh_dir }}"
+    state: absent
+
+- name: Re-creating /root/.ssh on target hosts
+  file:
+    path: "{{ rmt_ssh_dir }}"
+    state: directory
+    mode: 0700
+
+- name: Copying SSH key files from localhost to target hosts
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    mode: 0600
+  with_items:
+    - { src: '{{ files_dir }}/id_rsa', dst: '{{ rmt_ssh_dir }}/id_rsa' }
+    - { src: '{{ files_dir }}/id_rsa.pub', dst: '{{ rmt_ssh_dir }}/id_rsa.pub' }
+    - { src: '{{ files_dir }}/id_rsa.pub', dst: '{{ rmt_ssh_dir }}/authorized_keys' }

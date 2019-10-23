@@ -1,0 +1,35 @@
+---
+user_command_volumes:
+- /opt/software/appformix:/opt/software/appformix
+
+command_servers:
+    server0:
+        ip: 192.168.251.3
+        connection: ssh
+        ssh_user: root
+        ssh_pass: c0ntrail123
+        sudo_pass: c0ntrail123
+        ntpserver: 192.168.244.12
+
+        registry_insecure: false
+        container_registry: hub.juniper.net/contrail
+        container_tag: "1910.23"
+        container_registry_username: JNPR-FieldUser67
+        container_registry_password: XmDgxR6VLc4hvr3Y5pkG
+        config_dir: /etc/contrail
+
+        contrail_config:
+            database:
+                type: postgres
+                dialect: postgres
+                password: c0ntrail123
+            keystone:
+                assignment:
+                    data:
+                        users:
+                            admin:
+                                password: c0ntrail123
+            insecure: true
+            client:
+                password: c0ntrail123
+

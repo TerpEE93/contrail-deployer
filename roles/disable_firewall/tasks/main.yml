@@ -1,0 +1,23 @@
+---
+# tasks file for disable_firewall
+
+- name: Disabing firewalld
+  systemd:
+    state: stopped
+    enabled: no
+    name: firewalld
+
+- name: Flushing active iptables rules
+  iptables:
+    flush: yes
+
+- name: Clearing iptables configured rules
+  iptables:
+    chain: "{{ item }}"
+    policy: ACCEPT
+  with_items: [ 'FORWARD', 'INPUT', 'OUTPUT' ]
+  register: iptables_update
+
+- name: Saving iptables changes
+  command: iptables-save
+

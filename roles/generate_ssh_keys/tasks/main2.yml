@@ -1,0 +1,26 @@
+---
+# tasks file for generate_ssh_keys
+
+- name: Removing /root/.ssh
+  file:
+    path: "{{ rmt_ssh_dir }}"
+    state: absent
+
+- name: Re-creating /root/.ssh
+  file:
+    path: "{{ rmt_ssh_dir }}"
+    state: directory
+    mode: 0700
+
+- name: Running ssh-keygen
+  command: ssh-keygen -N "" -f /root/.ssh/id_rsa
+
+- name: Grabbing the key files
+  fetch:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    flat: yes
+  with_items:
+    - { src: '{{ rmt_ssh_dir }}/id_rsa', dst: 'files/{{ inventory_hostname }}-id_rsa' }
+    - { src: '{{ rmt_ssh_dir }}/id_rsa.pub', dst: 'files/{{ inventory_hostname }}-id_rsa.pub' }
+

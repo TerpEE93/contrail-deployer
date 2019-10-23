@@ -1,0 +1,28 @@
+---
+# tasks file for copy_command_files
+# Note that moving the Appformix files into place requires
+# that rsync is already installed and running on the target
+
+- name: Copying command_servers.yml
+  copy:
+    src: "{{ files_dir }}/{{ command_servers_file }}"
+    dest: "{{ rmt_working_dir }}/{{ command_servers_file }}"
+    mode: 0644
+    
+- name: Removing the /opt/software/appformix directory if it exists
+  file:
+    path: "{{ rmt_appformix_dir }}"
+    state: absent
+
+- name: Creating the /opt/software/appformix directory
+  file:
+    path: "{{ rmt_appformix_dir }}"
+    state: directory
+    owner: "{{ ansible_user}}"
+    mode: 0755
+
+- name: Copy over the necessary Appformix files
+  synchronize:
+    src: "{{ appformix_dir }}"
+    dest: "{{ rmt_appformix_dir }}"
+    use_ssh_args: yes

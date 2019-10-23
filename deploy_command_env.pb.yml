@@ -1,0 +1,156 @@
+---
+# deploy_command_env.pb.yml
+#   Ansible playbook to prep a set of hosts for a Contrail deployment.
+#   This does a bunch of housekeeping on all hosts in the environment
+#   to make sure they're ready for what comes next.  (That's very vague,
+#   I know.)  Then it deploys and runs the contrail_command_deployer
+#   container.
+
+#   Put your Appformix package and license files in ./files/appformix
+#   and the playbook will copy them to /opt/software/appformix on the
+#   command_host.
+
+#   Copy the file ./files/secrets-example.yml to ./vars/secrets.yml
+#   and populate it with the appropriate user/password data for your
+#   environment.
+
+#
+# Setup local variables, directories, and files
+#
+
+- name: Obligatory setup of file and path variables
+  hosts:
+    contrail_hosts
+    localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Setting up base directory and registry variables
+      set_fact:
+        files_dir: "./files"
+        secrets_file: "./vars/secrets.yml"
+        registry_location: "hub.juniper.net"
+
+    - name: Setting up other files and directory variables
+      set_fact:
+        appformix_dir: "{{ files_dir }}/appformix"
+        hosts_file: "hosts.txt"
+        command_servers_file: "command_servers.yml"
+        rmt_hosts_file: "/etc/hosts"
+        rmt_working_dir: "/root"
+        rmt_appformix_dir: "/opt/software"
+        rmt_ssh_dir: "/root/.ssh"
+        ssh_host_group: "{{ groups['contrail_hosts'] }}"
+        ssh_known_hosts_file: "known_hosts"
+
+    - name: Setting up container variables
+      set_fact:
+        container_name: "contrail_command_deployer"
+        image_name: "contrail-command-deployer"
+        image_url: "{{ registry_location }}/contrail"
+        image_tag: "{{ contrail_container_tag }}"
+
+
+- name: Loading sensitive data from secrets.yml
+  hosts:
+    contrail_hosts
+    localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - include_vars: "{{ secrets_file }}"
+    - set_fact:
+        registry_login: "{{ registry_login }}"
+        registry_pass: "{{ registry_pass }}"
+        root_pass: "{{ root_pass }}"
+        client_pass: "{{ client_pass }}"
+        db_pass: "{{ db_pass }}"
+        keystone_pass: "{{ keystone_pass }}"
+
+#
+# Building files that need to be deployed
+#
+
+- name: Auto-generate important files we'll need to deploy...
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - role: create_hosts_file
+    - role: create_command_servers_file
+    - role: generate_ssh_keys
+
+#
+# Copy files common to all target hosts
+#
+
+- name: Copying files common to all target hosts...
+  hosts: contrail_hosts
+  roles:
+    - role: copy_key_files
+    - role: copy_hosts_file
+
+- name: Generate a known_hosts file for all targets
+  hosts: command_hosts[0]
+  gather_facts: no
+  roles:
+    - role: generate_known_hosts
+
+- name: Copy the known_hosts file to targets
+  hosts: contrail_hosts
+  gather_facts: no
+  roles:
+    - role: copy_known_hosts
+
+#
+# Disable firewalld and clear and iptables rules on target hosts
+#
+
+- name: Fix firewalld and iptables on target hosts...
+  hosts: contrail_hosts
+  roles:
+    - role: disable_firewall
+
+#
+# Install packages needed on each host
+#
+
+- name: Install packages common to all hosts
+  hosts: contrail_hosts
+  roles:
+    - role: install_common_packages
+
+- name: Install packages specific to Appformix hosts
+  hosts: appformix_hosts
+  roles:
+    - role: install_appformix_packages
+
+- name: Install packages specific to Command hosts
+  hosts: command_hosts
+  roles:
+    - role: install_command_packages
+
+- name: Installing Python Docker modules on Command hosts, because things are broke...
+  hosts: command_hosts
+  roles:
+    - role: fix_command_python
+
+#
+# Copy all files necessary on the Command server
+#
+
+- name: Copying files to the Command server...
+  hosts: command_hosts
+  gather_facts: no
+  roles:
+    - role: copy_command_files
+
+#
+# Launch the deployer on the first Command server
+#
+
+- name: Deploying Contrail Command
+  hosts: command_hosts[0]
+  gather_facts: no
+  roles:
+    - role: run_command_deployer

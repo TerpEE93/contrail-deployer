@@ -1,0 +1,12 @@
+---
+# tasks file for create_command_servers
+
+- name: Cleaning up any old command_servers.yml files
+  file:
+    path: "{{ files_dir }}/{{ command_servers_file }}"
+    state: absent
+
+- name: Building command_servers.yml file
+  template:
+    src=command_servers.j2
+    dest={{ files_dir }}/{{ command_servers_file }}

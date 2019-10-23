@@ -1,0 +1,29 @@
+---
+# tasks file for generate_known_hosts
+# Run this on a single host.  I'd recommend the first/only
+# Command host
+
+- name: Remove the temporary '{{ ssh_known_hosts_file }}' if it exists on the host
+  file:
+    path: "{{ ssh_known_hosts_file }}"
+    state: absent
+
+- name: Scan each host in the group for its public key
+  shell: "{{ scan_command }} {{ item }}"
+  with_items: "{{ ssh_host_group }}"
+  register:  scan_results
+
+- name: Add each host's public key to the '{{ ssh_known_hosts_file }}'
+  known_hosts:
+    name: "{{ item.item }}"
+    key: "{{ item.stdout }}"
+    state: "present"
+    path: "{{ ssh_known_hosts_file }}"
+  with_items: "{{ scan_results.results }}"
+
+- name: Retrieve the '{{ ssh_known_hosts_file }}' and store it in '{{ files_dir }}'
+  fetch:
+    src: "{{ ssh_known_hosts_file }}"
+    dest: "{{ files_dir }}/{{ ssh_known_hosts_file }}"
+    flat: yes
+    

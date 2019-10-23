@@ -1,0 +1,38 @@
+#jinja2:lstrip_blocks: True
+---
+user_command_volumes:
+- /opt/software/appformix:/opt/software/appformix
+
+command_servers:
+    {% for i in groups ['command_hosts'] %}
+    server{{ loop.index0 }}:
+        ip: {{ hostvars[i].ansible_host }}
+        connection: ssh
+        ssh_user: root
+        ssh_pass: {{ root_pass }}
+        sudo_pass: {{ root_pass }}
+        ntpserver: {{ ntp_server }}
+
+        registry_insecure: false
+        container_registry: hub.juniper.net/contrail
+        container_tag: "{{ contrail_container_tag }}"
+        container_registry_username: {{ registry_login }}
+        container_registry_password: {{ registry_pass }}
+        config_dir: /etc/contrail
+
+        contrail_config:
+            database:
+                type: postgres
+                dialect: postgres
+                password: {{ db_pass }}
+            keystone:
+                assignment:
+                    data:
+                        users:
+                            admin:
+                                password: {{ keystone_pass }}
+            insecure: true
+            client:
+                password: {{ client_pass }}
+
+    {% endfor %}

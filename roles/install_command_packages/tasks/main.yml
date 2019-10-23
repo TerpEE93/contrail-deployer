@@ -1,0 +1,22 @@
+---
+# tasks file for install_command_packages
+
+- name: Add the Docker-CE repo
+  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+
+- name: Install command packages via yum
+  yum:
+    name: 
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - docker-ce-18.03.1.ce
+    state: present
+
+- name: Ensure docker runs at start
+  systemd:
+    name: docker
+    state: started
+    enabled: yes

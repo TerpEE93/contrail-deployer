@@ -1,0 +1,8 @@
+---
+# tasks file for copy_known_hosts
+
+- name: Copying known_hosts to ~/.ssh on targets
+  copy:
+    src: "{{ files_dir }}/{{ ssh_known_hosts_file }}"
+    dest: "{{ rmt_ssh_dir }}/{{ ssh_known_hosts_file }}"
+    mode: 0644

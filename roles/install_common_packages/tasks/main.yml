@@ -1,0 +1,9 @@
+---
+# tasks file for install_common_packages
+
+- name: Install common packages
+  yum:
+    name:
+      - rsync
+      - tcpdump
+    state: present

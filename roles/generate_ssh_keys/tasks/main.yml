@@ -1,0 +1,14 @@
+---
+# tasks file for generate_ssh_keys
+# Run this task on localhost only
+
+- name: Removing any old key files
+  file:
+    path: "{{ files_dir }}/{{ item }}"
+    state: absent
+  with_items:
+    - id_rsa
+    - id_rsa.pub
+
+- name: Running ssh-keygen
+  command: ssh-keygen -N "" -f {{files_dir }}/id_rsa

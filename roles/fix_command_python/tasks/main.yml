@@ -1,0 +1,26 @@
+---
+# tasks file for fix_command_python
+
+# Adding this becasue the Docker plays run on the Command hosts
+# later will fail if we don't do this.  Incidentally, the docs
+# for deploying Command say to be sure to uninstall the Docker
+# modules for Python before deployment, but Ansible seems to
+# need them.
+
+- name: Adding the epel repo to yum
+  yum:
+    name:
+      - epel-release
+    state: present
+
+- name: Installing pip for Python-2.7
+  yum:
+    name:
+      - python-pip
+    state: present
+
+- name: Installing Python Docker modules via pip
+  pip:
+    name:
+      - docker
+    state: present

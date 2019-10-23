@@ -1,0 +1,29 @@
+---
+# tasks file for run_command_deployer
+# The deployer should run only on the first Command host.
+# It will take care of the rest.
+
+- name: Login to the repo
+  docker_login:
+    registry: "{{ registry_location }}"
+    username: "{{ registry_login }}"
+    password: "{{ registry_pass }}"
+    reauthorize: yes
+
+- name: Pull the command-deployer container
+  docker_container: 
+    name: "{{ container_name }}"
+    image: "{{ image_url }}/{{ image_name }}:{{ image_tag }}"
+    state: present
+
+- name: Start the command-deployer container
+  docker_container:
+    name: "{{ container_name }}"
+    image: "{{ image_url }}/{{ image_name }}:{{ image_tag }}"
+    tty: yes
+    detach: yes
+    privileged: yes
+    network_mode: host
+    volumes:
+      - /root/command_servers.yml:/command_servers.yml
+    state: started

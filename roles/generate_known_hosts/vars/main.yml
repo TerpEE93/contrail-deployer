@@ -1,0 +1,3 @@
+---
+# vars file for generate_known_hosts
+scan_command: "ssh-keyscan -t ecdsa"
