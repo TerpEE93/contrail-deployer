@@ -1,0 +1,80 @@
+global_configuration:
+  CONTAINER_REGISTRY: hub.juniper.net/contrail
+  REGISTRY_PRIVATE_INSECURE: false
+  CONTAINER_REGISTRY_USERNAME: JNPR-FieldUser67
+  CONTAINER_REGISTRY_PASSWORD: XmDgxR6VLc4hvr3Y5pkG
+provider_config:
+  bms:
+    ssh_user: root
+    ssh_pwd: c0ntrail123
+    ntpserver: 192.168.244.12
+    domainsuffix: 251.lab
+instances:
+  aio:
+    ip: 192.168.251.4
+    provider: bms
+    roles:
+      config:
+      dhcp:
+      config_database:
+      control:
+      webui:
+      analytics:
+      analytics_database:
+      analytics_alarm:
+      analytics_snmp:
+      vcenter_fabric_manager:
+      vrouter:
+        TSN_EVPN_MODE: true
+        VROUTER_GATEWAY: 10.100.100.1
+      openstack_control:
+      openstack_network:
+      openstack_storage:
+      openstack_monitoring:
+      openstack_compute:
+      appformix_openstack_controller:
+      appformix_compute:
+  appformix:
+    ip: 192.168.251.5
+    provider: bms
+    roles:
+      appformix_controller:
+      appformix_bare_host:
+      appformix_network_agents:
+contrail_configuration:
+  CONTRAIL_VERSION: "1910.23"
+  CLOUD_ORCHESTRATOR: openstack
+  RABBITMQ_NODE_PORT: 5673
+  VROUTER_GATEWAY: 10.100.100.1
+  ENCAP_PRIORITY: VXLAN,MPLSoUDP,MPLSoGRE
+  OPENSTACK_VERSION: queens
+  AUTH_MODE: keystone
+  KEYSTONE_AUTH_HOST: 192.168.251.4
+  KEYSTONE_AUTH_URL_VERSION: /v3
+  CONTROLLER_NODES: 192.168.251.4
+  CONTROL_NODES: 10.100.100.4
+  TSN_NODES: 10.100.100.4
+  GENERATE_SSH: True
+  USE_OPENSTACK_TFTP: True
+  VCENTER_SERVER: 192.168.254.108
+  VCENTER_DATACENTER: Juniper Technica Lab
+  VCENTER_USERNAME: administrator@splab.local
+  VCENTER_PASSWORD: Juniper@TCH-400
+kolla_config:
+  kolla_globals:
+    enable_haproxy: no
+    enable_ironic: no
+    enable_swift: yes
+    swift_disk_partition_size: 32GB
+    upgrade_kernel: yes
+    enable_haproxy: no
+    openstack_release: queens
+  kolla_passwords:
+    keystone_admin_password: contrail123
+  customize:
+    nova.conf: |
+             [libvirt]
+             virt_type=qemu
+             cpu_mode=none
+appformix_configuration:
+    appformix_license:  /opt/software/appformix/appformix-internal-openstack-3.1.sig

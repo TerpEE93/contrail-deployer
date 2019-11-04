@@ -12,15 +12,27 @@
     name:
       - epel-release
     state: present
+  register: yum_result
+  until: yum_result is not failed
+  retries: 3
+  delay: 5
 
 - name: Installing pip for Python-2.7
   yum:
     name:
       - python-pip
     state: present
+  register: yum_result
+  until: yum_result is not failed
+  retries: 3
+  delay: 5
 
 - name: Installing Python Docker modules via pip
   pip:
     name:
       - docker
     state: present
+  register: pip_result
+  until: pip_result is not failed
+  retries: 3
+  delay: 5

@@ -9,12 +9,20 @@
     username: "{{ registry_login }}"
     password: "{{ registry_pass }}"
     reauthorize: yes
+  register: login_result
+  until: login_result is not failed
+  retries: 3
+  delay: 5
 
 - name: Pull the command-deployer container
   docker_container: 
     name: "{{ container_name }}"
     image: "{{ image_url }}/{{ image_name }}:{{ image_tag }}"
     state: present
+  register: pull_result
+  until: pull_result is not failed
+  retries: 3
+  delay: 5
 
 - name: Start the command-deployer container
   docker_container:

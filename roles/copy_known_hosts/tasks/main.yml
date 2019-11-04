@@ -6,3 +6,7 @@
     src: "{{ files_dir }}/{{ ssh_known_hosts_file }}"
     dest: "{{ rmt_ssh_dir }}/{{ ssh_known_hosts_file }}"
     mode: 0644
+  register: copy_result
+  until: copy_result is not failed
+  retries: 3
+  delay: 5

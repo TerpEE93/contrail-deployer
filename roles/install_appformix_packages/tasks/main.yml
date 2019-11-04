@@ -6,3 +6,7 @@
     name:
       - libvirt
     state: present
+  register: yum_result
+  until: yum_result is not failed
+  retries: 3
+  delay: 5
