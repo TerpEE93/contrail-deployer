@@ -8,11 +8,19 @@
     src: "{{ files_dir }}/{{ command_servers_file }}"
     dest: "{{ rmt_working_dir }}/{{ command_servers_file }}"
     mode: 0644
+  register: copy_result
+  until: copy_result is not failed
+  retries: 3
+  delay: 5
     
 - name: Removing the /opt/software/appformix directory if it exists
   file:
     path: "{{ rmt_appformix_dir }}"
     state: absent
+  register: path_delete
+  until: path_delete is not failed
+  retries: 3
+  delay: 5
 
 - name: Creating the /opt/software/appformix directory
   file:
@@ -20,9 +28,17 @@
     state: directory
     owner: "{{ ansible_user}}"
     mode: 0755
+  register: path_create
+  until: path_create is not failed
+  retries: 3
+  delay: 5
 
 - name: Copy over the necessary Appformix files
   synchronize:
     src: "{{ appformix_dir }}"
     dest: "{{ rmt_appformix_dir }}"
     use_ssh_args: yes
+  register: rsync_result
+  until: rsync_result is not failed
+  retries: 3
+  delay: 5

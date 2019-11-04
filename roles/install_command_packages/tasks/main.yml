@@ -14,9 +14,18 @@
       - lvm2
       - docker-ce-18.03.1.ce
     state: present
-
+  register: yum_result
+  until: yum_result is not failed
+  retries: 3
+  delay: 5
+  
 - name: Ensure docker runs at start
   systemd:
     name: docker
     state: started
     enabled: yes
+  register: docker_started
+  until: docker_started is not failed
+  retries: 3
+  delay: 5
+  

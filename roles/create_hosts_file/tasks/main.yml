@@ -1,14 +1,14 @@
 ---
 # tasks file for create_hosts_file
 
-- name: Grabbing the domain suffix for the hosts
-  set_fact:
-    domain_suffix: "{{ domain_suffix }}"
-
 - name: Cleaning up any old hosts files
   file:
     path: "{{ files_dir }}/hosts.txt"
     state: absent
+
+- name: Grabbing the domain suffix for the hosts
+  set_fact:
+    domain_suffix: "{{ domain_suffix }}"
 
 - name: Building /etc/hosts file
   template:

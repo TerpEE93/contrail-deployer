@@ -6,3 +6,7 @@
     src: "{{ files_dir }}/{{ hosts_file }}"
     dest: "{{ rmt_hosts_file }}"
     mode: 0644
+  register: copy_result
+  until: copy_result is not failed
+  retries: 3
+  delay: 5

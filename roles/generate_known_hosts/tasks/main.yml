@@ -1,7 +1,7 @@
 ---
 # tasks file for generate_known_hosts
-# Run this on a single host.  I'd recommend the first/only
-# Command host
+# Run this on a single host.  I'd recommend the Deployer host
+# (that's the first/only Command host).
 
 - name: Remove the temporary '{{ ssh_known_hosts_file }}' if it exists on the host
   file:
